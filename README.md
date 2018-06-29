@@ -1,5 +1,7 @@
 # ScriptableObjectFactory
-A Unity editor extension for creating any ScriptableObject type
+A Unity editor extension for creating ScriptableObjects
+
+Right click > Create > ScriptableObject in the project view
 
 Download as a .UnityPackage: [ScriptableObjectFactory](https://www.dropbox.com/s/f8fwosvjt8obi6h/ScriptableObjectFactory.unitypackage?dl=0)
 
