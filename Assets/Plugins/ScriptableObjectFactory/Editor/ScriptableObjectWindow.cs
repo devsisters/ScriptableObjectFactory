@@ -92,13 +92,16 @@ namespace ScriptableObjectFactory
             }
         }
 
+        private Vector2 _scrollPos;
+
         private void DrawSelectionPopup()
         {
             GUILayout.Space(6);
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Select ScriptableObject Class:", GUILayout.Width(LabelWidth));
-            _selectedIndex = EditorGUILayout.Popup(_selectedIndex, _searchResults);
-            GUILayout.EndHorizontal();
+
+            using (var scope = new EditorGUILayout.ScrollViewScope(_scrollPos,EditorStyles.helpBox)) {
+                _selectedIndex = GUILayout.SelectionGrid(_selectedIndex, _searchResults, 1);
+                _scrollPos = scope.scrollPosition;
+            }
         }
 
         private void DrawCreateButton()
@@ -123,7 +126,7 @@ namespace ScriptableObjectFactory
 
         private string[] FindMatchingNames(string filter)
         {
-            var selectedName = _searchResults.Length == 0 
+            var selectedName = _searchResults.Length == 0
                 ? string.Empty
                 : _searchResults[_selectedIndex];
 
@@ -132,8 +135,8 @@ namespace ScriptableObjectFactory
                 : _scriptableObjectNames.Where(scriptableObjectname => IsMatch(scriptableObjectname, filter)).ToArray();
 
             var newIndex = Array.FindIndex(matchingNames, matchingName => matchingName == selectedName);
-            _selectedIndex = newIndex < 0 
-                ? 0 
+            _selectedIndex = newIndex < 0
+                ? 0
                 : newIndex;
 
             return matchingNames;

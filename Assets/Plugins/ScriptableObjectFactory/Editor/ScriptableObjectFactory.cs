@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
@@ -6,31 +7,31 @@ using UnityEngine;
 
 namespace ScriptableObjectFactory
 {
-    public class ScriptableObjectFactory
+    public static class ScriptableObjectFactory
     {
         [MenuItem("Assets/Create/ScriptableObject")]
-        public static void CreateScriptableObject()
-        {
-            Type[] allScriptableObjects;
+        public static void CreateScriptableObject() {
 
-            try
-            {
-                var assembly = GetAssembly();
-                allScriptableObjects = (from t in assembly.GetTypes()
-                    where t.IsSubclassOf(typeof(ScriptableObject))
-                    select t).ToArray();
+            List<Type> allScriptableObjects;
+
+            try {
+                var assemblies = GetAssemblies();
+
+                allScriptableObjects= new List<Type>(from assembly in assemblies
+                    from type in assembly.GetTypes()
+                    where type.IsSubclassOf(typeof(ScriptableObject))
+                    select type);
             }
-            catch (Exception)
-            {
-                allScriptableObjects = new Type[] { };
+            catch (Exception e) {
+                Debug.LogError("Error while opening scriptable object window: "+e.Message);
+                allScriptableObjects = new List<Type>();
             }
-             
-            ScriptableObjectWindow.Init(allScriptableObjects);
+
+            ScriptableObjectWindow.Init(allScriptableObjects.ToArray());
         }
 
-        private static Assembly GetAssembly()
-        {
-            return Assembly.Load(new AssemblyName("Assembly-CSharp"));
+        private static IEnumerable<Assembly> GetAssemblies() {
+            return AppDomain.CurrentDomain.GetAssemblies();
         }
     }
 }
