@@ -42,6 +42,7 @@ namespace ScriptableObjectFactory
         private string[] _searchResults = { };
         private int _selectedIndex;
         private static string[] _scriptableObjectNames;
+        private static int _selectedAssembly;
 
         private static Type[] _types;
 
@@ -55,9 +56,10 @@ namespace ScriptableObjectFactory
             }
         }
 
-        public static void Init(Type[] scriptableObjects)
+        public static void Init(Type[] scriptableObjects, bool getAllAssemblies)
         {
             Types = scriptableObjects;
+            _selectedAssembly = Convert.ToInt32(getAllAssemblies);
 
             var window = GetWindow<ScriptableObjectWindow>(true, "Create a new ScriptableObject", true);
             window.ShowPopup();
@@ -70,9 +72,25 @@ namespace ScriptableObjectFactory
 
         public void OnGUI()
         {
+            DrawAssemblySelection();
             DrawSearch();
             DrawSelectionPopup();
             DrawCreateButton();
+        }
+
+        private void DrawAssemblySelection()
+        {
+            GUILayout.Space(6);
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Assembly:", GUILayout.Width(LabelWidth));
+            var selectedAssembly = GUILayout.Toolbar(_selectedAssembly, new[] {"C#", "All Assemblies"});
+            if (selectedAssembly != _selectedAssembly)
+            {
+                ScriptableObjectFactory.CreateScriptableObjectFactoryWindow(Convert.ToBoolean(selectedAssembly));
+                _searchResults = FindMatchingNames(_searchFilter);
+            }
+
+            GUILayout.EndHorizontal();
         }
 
         private void DrawSearch()

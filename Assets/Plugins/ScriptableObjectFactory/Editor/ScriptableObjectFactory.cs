@@ -10,27 +10,41 @@ namespace ScriptableObjectFactory
     public static class ScriptableObjectFactory
     {
         [MenuItem("Assets/Create/ScriptableObject")]
-        public static void CreateScriptableObject() {
+        public static void CreateScriptableObjectFactoryWindow()
+        {
+            CreateScriptableObjectFactoryWindow(false);
+        }
 
-            List<Type> allScriptableObjects;
+        public static void CreateScriptableObjectFactoryWindow(bool getAllAssemblies)
+        {
 
-            try {
-                var assemblies = GetAssemblies();
+            List<Type> allScriptableObjectTypes;
 
-                allScriptableObjects= new List<Type>(from assembly in assemblies
+            try
+            {
+                var assemblies = getAllAssemblies ? GetAllAssemblies() : GetCSharpAssembly();
+
+                allScriptableObjectTypes = new List<Type>(from assembly in assemblies
                     from type in assembly.GetTypes()
                     where type.IsSubclassOf(typeof(ScriptableObject))
                     select type);
             }
-            catch (Exception e) {
-                Debug.LogError("Error while opening scriptable object window: "+e.Message);
-                allScriptableObjects = new List<Type>();
+            catch (Exception e)
+            {
+                Debug.LogError("Error while opening scriptable object window: " + e.Message);
+                allScriptableObjectTypes = new List<Type>();
             }
 
-            ScriptableObjectWindow.Init(allScriptableObjects.ToArray());
+            ScriptableObjectWindow.Init(allScriptableObjectTypes.ToArray(), getAllAssemblies);
         }
 
-        private static IEnumerable<Assembly> GetAssemblies() {
+        private static IEnumerable<Assembly> GetCSharpAssembly()
+        {
+            return new[] {Assembly.Load(new AssemblyName("Assembly-CSharp"))};
+        }
+
+        private static IEnumerable<Assembly> GetAllAssemblies()
+        {
             return AppDomain.CurrentDomain.GetAssemblies();
         }
     }
