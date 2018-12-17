@@ -18,21 +18,22 @@ namespace ScriptableObjectFactory
         public static void CreateScriptableObjectFactoryWindow(bool getAllAssemblies)
         {
 
-            List<Type> allScriptableObjectTypes;
+            var allScriptableObjectTypes = new List<Type>();
 
-            try
+            var assemblies = getAllAssemblies ? GetAllAssemblies() : GetCSharpAssembly();
+            foreach (var assembly in assemblies)
             {
-                var assemblies = getAllAssemblies ? GetAllAssemblies() : GetCSharpAssembly();
-
-                allScriptableObjectTypes = new List<Type>(from assembly in assemblies
-                    from type in assembly.GetTypes()
-                    where type.IsSubclassOf(typeof(ScriptableObject))
-                    select type);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError("Error while opening scriptable object window: " + e.Message);
-                allScriptableObjectTypes = new List<Type>();
+                try
+                {
+                    allScriptableObjectTypes.AddRange(from type in assembly.GetTypes()
+                        where type.IsSubclassOf(typeof(ScriptableObject))
+                        select type);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("Error while opening scriptable object window: "
+                                   + "assembly=" + assembly.FullName + "\n" + e.Message);
+                }
             }
 
             ScriptableObjectWindow.Init(allScriptableObjectTypes.ToArray(), getAllAssemblies);
